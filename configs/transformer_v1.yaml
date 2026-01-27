@@ -1,0 +1,61 @@
+# transformer_v1.yaml
+# Optimized Configuration for Small Dataset (300 pairs)
+
+## Where the checkpoints will be saved
+save_data: data/train_data/run/example
+save_model: data/train_data/run/model
+
+# Vocabulary files
+src_vocab: data/train_data/run/example.vocab.src
+tgt_vocab: data/train_data/run/example.vocab.tgt
+
+# Vocabulary options
+src_words_min_frequency: 1
+tgt_words_min_frequency: 1
+n_sample: 0 # Set to 0 to start training immediately
+
+# Corpus definition
+data:
+    corpus_1:
+        path_src: data/train_data/train.src
+        path_tgt: data/train_data/train.tgt
+    valid:
+        path_src: data/train_data/valid.src
+        path_tgt: data/train_data/valid.tgt
+
+# Batching & Reporting (Crucial for small datasets)
+batch_type: examples
+batch_size: 16
+valid_batch_size: 8
+accum_count: [1]
+report_every: 10
+save_checkpoint_steps: 100
+valid_steps: 100
+
+# Training Schedule
+train_steps: 2000
+warmup_steps: 100
+learning_rate: 2
+decay_method: noam
+optim: adam
+adam_beta1: 0.9
+adam_beta2: 0.998
+max_grad_norm: 0
+seed: 42
+
+# Model Architecture: Transformer (Standard but kept light)
+model_task: seq2seq
+encoder_type: transformer
+decoder_type: transformer
+word_vec_size: 512
+hidden_size: 512
+layers: 6
+transformer_ff: 2048
+heads: 8
+param_init: 0
+param_init_glorot: true
+normalization: tokens
+
+# Hardware settings
+world_size: 1
+gpu_ranks: [0]
