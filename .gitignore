@@ -13,4 +13,4 @@ venv/
 *.model
 *.vocab
 data/train_data/run/
-data/processed/malicious_raw.tsv # 원본 데이터는 이미 있으므로 제외 선택 가능 (사용자 판단)
+data/processed/malicious_raw.tsv
