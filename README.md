@@ -26,7 +26,7 @@ Utilizing a Transformer-based Neural Machine Translation (NMT) architecture, the
 - **Language**: Python 3.x
 - **Infrastructure**: Google Colab (T4 GPU) for training
 
-## 📝 Roadmap
+## Roadmap
 
 1.  **Phase 1**: Initial baseline training with small dataset (Completed).
 2.  **Phase 2**: Bulk data augmentation and diversity enhancement (Completed - 1,000 pairs).
