@@ -80,11 +80,11 @@ class RefinerV2:
 
 if __name__ == "__main__":
     # 경로 설정
-    PROMPT_FILE = "prompts/purification_v2.0.md"
-    INPUT_FILE = "data/processed/malicious_purified.tsv" # 기존 파일
-    OUTPUT_FILE = "data/processed/malicious_purified_v2.0.tsv" # 새 파일
+    PROMPT_FILE = "prompts/purification_v2.1.md"
+    INPUT_FILE = "data/processed/malicious_purified.tsv"
+    OUTPUT_FILE = "data/processed/malicious_purified_v2.1.tsv"
     
     refiner = RefinerV2(PROMPT_FILE, INPUT_FILE, OUTPUT_FILE)
     
-    # 예시: 0번부터 100개 처리
-    # refiner.run(start_idx=0, count=100)
+    # 0번부터 50개 처리 (2번 라인부터 51번 라인까지)
+    refiner.run(start_idx=0, count=50)
