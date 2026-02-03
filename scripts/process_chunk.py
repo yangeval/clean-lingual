@@ -62,23 +62,33 @@ def main():
     # 에이전트 작업 영역 (여기만 수정)
     # ==========================================
     
-    for row in raw_data:
-        source = row[0]
-        # 원본 labels 리스트를 한글 텍스트로 자동 변환
-        origin_tags = parse_origin_tags(row[-1])
-        
-        # 기본값 설정 (에러 방지)
-        target, action, severity, category, reason = source, 0, 0, "NORMAL", "정상 문장"
-        
-        # -- 라벨링 로직 시작 --
-        
-        # -- 라벨링 로직 끝 --
-        
-        labeled_data.append([source, target, action, severity, category, reason, origin_tags])
+    # 튜플 리스트 형식: [(target, action, severity, category, reason), ...]
+    # 원본 데이터 순서와 100% 일치해야 함.
+    results = [
+        # (예시) ("순화어", 2, 2, "GENDER", "이유"),
+    ]
     
     # ==========================================
     # 에이전트 작업 영역 끝
     # ==========================================
+    
+    # 결과 개수 즉시 검증
+    if len(results) != actual_count:
+        raise ValueError(
+            f" 결과 개수 불일치!\n"
+            f"   원본 데이터: {actual_count}건\n"
+            f"   라벨링 결과: {len(results)}건\n"
+            f"   → results 리스트의 개수를 확인하세요."
+        )
+
+    # 데이터 병합
+    for i, row in enumerate(raw_data):
+        source = row[0]
+        # 원본 labels 리스트를 한글 텍스트로 자동 변환
+        origin_tags = parse_origin_tags(row[-1])
+        
+        target, action, severity, category, reason = results[i]
+        labeled_data.append([source, target, action, severity, category, reason, origin_tags])
     
     # 4. 저장
     output_file = r'd:\Dev\clean-lingual\data\processed\clean_lingual_v0.5.tsv'
