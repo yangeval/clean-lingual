@@ -7,7 +7,7 @@ description: 대량 데이터 라벨링 자동화 (Turbo Mode)
 # 대량 라벨링 자동화 (SOP v0.7.0)
 사용법: `/label-data {START_LINE} {END_LINE}`
 
-## ⚠️ 중요: 원칙 통합 (Source of Truth)
+## 중요: 원칙 통합 (Source of Truth)
 본 워크플로우는 **운영 절차(Operation)**만 담당합니다. 모든 **라벨링 논리(Logic)** 및 **금기 사항**은 아래 두 파일을 100% 따릅니다.
 - **실행 로직**: `prompts/labeling_workflow.md` (마스터 SOP)
 - **라벨링 규칙**: `prompts/labeling_rules.md` (헌법)
