@@ -1,62 +1,62 @@
 import pandas as pd
 import os
+from sklearn.model_selection import train_test_split
 
-# 1. 경로 설정
-DATA_DIR = os.path.join("data", "processed")
-INPUT_FILE = os.path.join(DATA_DIR, "malicious_purified.tsv")
-OUTPUT_DIR = os.path.join("data", "train_data")
-def split_data():
-    # 저장 디렉토리 생성
-    if not os.path.exists(OUTPUT_DIR):
-        os.makedirs(OUTPUT_DIR)
-        print(f"[Info] 디렉토리 생성: {OUTPUT_DIR}")
-
-    # 데이터 로드
-    if not os.path.exists(INPUT_FILE):
-        print(f"[Error] 파일을 찾을 수 없습니다: {INPUT_FILE}")
+def split_dataset():
+    # 설정
+    input_file = r'd:\Dev\clean-lingual\data\processed\clean_lingual_v0.5.tsv'
+    output_dir = r'd:\Dev\clean-lingual\data\processed\split'
+    
+    # 1. 데이터 로드
+    print(f"데이터 로드 중: {input_file}")
+    if not os.path.exists(input_file):
+        print(f"에러: 파일을 찾을 수 없습니다. ({input_file})")
         return
 
-    df = pd.read_csv(INPUT_FILE, sep="\t")
-    print(f"[Info] 총 데이터 개수: {len(df)}")
+    df = pd.read_csv(input_file, sep='\t')
+    print(f"총 데이터 수: {len(df)}건")
 
-    # 데이터 무작위 셔플링
-    df = df.sample(frac=1, random_state=42).reset_index(drop=True)
+    # 2. 데이터 분할 (Train 80%, Val 10%, Test 10%)
+    # 층화 추출(stratify)을 통해 action 라벨 분포를 유지합니다.
+    print("데이터 분할 중 (8:1:1)...")
+    train_df, temp_df = train_test_split(
+        df, 
+        test_size=0.2, 
+        random_state=42, 
+        stratify=df['action']
+    )
 
-    # 분할 포인트 계산
-    num_total = len(df)
-    num_train = int(num_total * 0.8)
-    num_valid = int(num_total * 0.1)
+    val_df, test_df = train_test_split(
+        temp_df, 
+        test_size=0.5, 
+        random_state=42, 
+        stratify=temp_df['action']
+    )
+
+    # 3. 출력 디렉토리 생성
+    os.makedirs(output_dir, exist_ok=True)
+
+    # 4. 파일 저장
+    train_path = os.path.join(output_dir, 'train.tsv')
+    val_path = os.path.join(output_dir, 'val.tsv')
+    test_path = os.path.join(output_dir, 'test.tsv')
+
+    train_df.to_csv(train_path, sep='\t', index=False)
+    val_df.to_csv(val_path, sep='\t', index=False)
+    test_df.to_csv(test_path, sep='\t', index=False)
+
+    # 5. 결과 보고
+    print("-" * 50)
+    print(f"분할 완료!")
+    print(f" - Train: {len(train_df)}건 ({len(train_df)/len(df):.1%}) -> {train_path}")
+    print(f" - Val:   {len(val_df)}건 ({len(val_df)/len(df):.1%}) -> {val_path}")
+    print(f" - Test:  {len(test_df)}건 ({len(test_df)/len(df):.1%}) -> {test_path}")
+    print("-" * 50)
     
-    # 데이터 분할
-    train_df = df.iloc[:num_train]
-    valid_df = df.iloc[num_train:num_train + num_valid]
-    test_df = df.iloc[num_train + num_valid:]
-
-    # 결과 저장
-    split_info = {
-        "train": train_df,
-        "valid": valid_df,
-        "test": test_df
-    }
-
-    for name, data in split_info.items():
-        # 1. 통합 TSV 저장 (source, target 포함)
-        tsv_path = os.path.join(OUTPUT_DIR, f"{name}.tsv")
-        data.to_csv(tsv_path, sep="\t", index=False, encoding="utf-8-sig")
-        
-        # 2. OpenNMT 학습을 위한 별도 파일 저장 (src, tgt)
-        src_path = os.path.join(OUTPUT_DIR, f"{name}.src")
-        tgt_path = os.path.join(OUTPUT_DIR, f"{name}.tgt")
-        
-        data["source"].to_csv(src_path, index=False, header=False, encoding="utf-8")
-        data["target"].to_csv(tgt_path, index=False, header=False, encoding="utf-8")
-
-        print(f"[Success] {name} 세트 저장 완료: {len(data)}개")
+    # 라벨 분포 확인
+    print("\n라벨(action) 분포 확인:")
+    print("Original:\n", df['action'].value_counts(normalize=True).sort_index())
+    print("\nTrain:\n", train_df['action'].value_counts(normalize=True).sort_index())
 
 if __name__ == "__main__":
-    try:
-        split_data()
-    except ImportError:
-        print("[Error] scikit-learn 이 설치되어 있지 않습니다. 'pip install scikit-learn'을 실행해 주세요.")
-    except Exception as e:
-        print(f"[Error] {e}")
+    split_dataset()

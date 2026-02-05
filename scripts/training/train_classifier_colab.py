@@ -16,7 +16,7 @@ from transformers import (
 import evaluate
 
 # 1. 환경 설정 및 데이터 경로
-DATA_PATH = "data/train_data/v0.5/"
+DATA_PATH = "data/processed/split/"
 OUTPUT_DIR = "./results"
 MODEL_SAVE_DIR = "./final_model"
 MODEL_NAME = "beomi/KcELECTRA-base-v2022"
@@ -29,7 +29,7 @@ def train():
     print("[*] 로컬 데이터 로드 중...")
     try:
         train_df = pd.read_csv(os.path.join(DATA_PATH, "train.tsv"), sep="\t")
-        valid_df = pd.read_csv(os.path.join(DATA_PATH, "valid.tsv"), sep="\t")
+        valid_df = pd.read_csv(os.path.join(DATA_PATH, "val.tsv"), sep="\t")
     except FileNotFoundError:
         print("[Error] 데이터를 찾을 수 없습니다. 경로를 확인해주세요.")
         return
