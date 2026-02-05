@@ -1,9 +1,8 @@
 # %% [markdown]
 # # ======================================================================================
-# # Clean-Lingual: Stage 1 Classifier All-in-One Colab Notebook Script (v0.5)
+# # Clean-Lingual: Stage 1 Classifier Training Notebook (GitHub Data v0.5)
 # # ======================================================================================
-# 이 파일은 Google Colab에서 0.5버전 분류기 학습의 모든 과정을 재현하기 위한 코드 모음입니다.
-# VS Code의 Colab 확장 프로그램이나 Jupyter 인터랙티브 창에서 각 셀(Cell)을 하나씩 실행하세요.
+# 이 파일은 GitHub에서 데이터를 직접 불러와 학습하는 코랩용 마스터 스크립트입니다.
 
 # %% [CELL 1] 필수 라이브러리 설치 및 환경 설정
 !pip install -q transformers[torch] datasets evaluate scikit-learn
@@ -25,28 +24,34 @@ import evaluate
 # 가상환경 및 로깅 관련 설정
 os.environ["WANDB_DISABLED"] = "true" 
 
-# %% [CELL 2] 데이터 로드 및 경로 확인
-# 로컬 데이터를 코랩으로 업로드해야 할 경우 아래 코드를 사용하세요.
-# (확장 프로그램이 워크스페이스를 자동 동기화한다면 생략 가능합니다.)
+# %% [CELL 2] GitHub 데이터 동기화
+# 저장소 이름 정의
+REPO_NAME = "clean-lingual"
+REPO_URL = f"https://github.com/yangeval/clean-lingual.git"
 
-from google.colab import files
-import os
-
-# 데이터가 저장될 경로 설정
-DATA_PATH = "data/processed/split/"
-os.makedirs(DATA_PATH, exist_ok=True)
-
-# 만약 파일이 없다면 업로드 요청
-if not os.path.exists(os.path.join(DATA_PATH, "train.tsv")):
-    print("[!] 학습 데이터가 없습니다. 파일을 업로드해 주세요.")
-    uploaded = files.upload()
-    for filename in uploaded.keys():
-        # 전처리 디렉토리로 이동
-        target_path = os.path.join(DATA_PATH, filename)
-        with open(target_path, "wb") as f:
-            f.write(uploaded[filename])
+# 1. 저장소가 없으면 clone, 있으면 최신 데이터 pull
+if not os.path.exists(REPO_NAME):
+    print(f"[*] 저장소 클론 중: {REPO_URL}")
+    !git clone {REPO_URL}
 else:
-    print(f"[*] 데이터 경로 확인 완료: {DATA_PATH}")
+    print("[*] 기존 저장소 발견. 최신 데이터를 가져옵니다.")
+    %cd {REPO_NAME}
+    !git pull origin main
+    %cd ..
+
+# 2. 데이터 경로 설정 (GitHub 저장소 내의 분할 데이터 위치)
+DATA_PATH = os.path.join(REPO_NAME, "data/processed/split/")
+
+# 3. 파일 존재 여부 최종 확인
+required_files = ["train.tsv", "val.tsv", "test.tsv"]
+all_clear = True
+for f in required_files:
+    if not os.path.exists(os.path.join(DATA_PATH, f)):
+        print(f"[!] 에러: {f} 파일을 찾을 수 없습니다.")
+        all_clear = False
+
+if all_clear:
+    print(f"[*] 모든 학습 데이터가 준비되었습니다: {DATA_PATH}")
 
 # %% [CELL 3] 데이터셋 전처리 (HuggingFace Format)
 MODEL_NAME = "beomi/KcELECTRA-base-v2022"
@@ -106,6 +111,9 @@ trainer = Trainer(
     compute_metrics=compute_metrics,
 )
 
+print("\n" + "="*50)
+print("🚀 KcELECTRA 분류기 학습 시작 (v0.5)")
+print("="*50)
 trainer.train()
 
 # %% [CELL 5] 최종 테스트 및 결과 분석
